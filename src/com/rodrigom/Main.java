@@ -19,17 +19,16 @@ public class Main {
 
     public static void main(String[] args) {
         //Lectura de la expresión aritmética.
-        Nodo<String> arbol = new Nodo<>("10");
-        arbol.agregarNodo("5");
-        arbol.agregarNodo("15");
+        Nodo<String> arbol = new Nodo<>("+");
         arbol.agregarNodo("8");
+        arbol.agregarNodo("2");
 
 
-
+        System.out.println("Infija");
         arbol.inOrden();
-        System.out.println("");
+        System.out.println("\nPostfija");
         arbol.postOrden();
-        System.out.println("");
+        System.out.println("\nPrefija");
         arbol.preOrden();
 
         /**

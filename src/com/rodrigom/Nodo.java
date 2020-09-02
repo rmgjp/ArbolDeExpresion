@@ -37,14 +37,14 @@ public class Nodo<T> {
      * del programa.
      * @return
      */
-    public int getValorImportancia(){
-        if(valor.toString().matches("[+,-]]")){
+    public int getValorImportancia(T valor){
+        if(valor.toString().equals("+") || valor.toString().equals("-")){
             return 4;
         }
-        if(valor.toString().matches("[*,/]]")){
+        if(valor.toString().equals("*") || valor.toString().equals("/")){
             return 3;
         }
-        if(valor.toString().matches("['^']")){
+        if(valor.toString().equals("^") ){
             return 2;
         }
         else{
@@ -56,35 +56,35 @@ public class Nodo<T> {
      * Este metodo agrega valor a los nodos hijo (u hojas) para la generación de un arbol.
      * Primero genera un nuevo objeto nodo para agregarle el valor y obtener el valor de importancia que tiene.
      * el funcionamiento es muy similar al de un arbol binario pero con unos cambios que se presentan a continuación.
-     * @param valor
+     * @param Valor
      */
-    public void agregarNodo(T valor){
+    public void agregarNodo(T Valor){
         //Declaración e inicialización de la hoja
-        Nodo<T> nodoNuevo = new Nodo<>(valor);
+        Nodo<T> nodoNuevo = new Nodo<>(Valor);
         /**Para evitar que el nodo raíz principal sea remplazada (que en este caso se generará con la jerarquia antes mencionada)
          * se verifica por medio de una variable booleana si es la raíz en caso de que sea verdadera solo se agregara el nodo izquierdo
          * sino se verificara si el nodo tiene una importancia menor y en caso de que sea así se remplazará.
          */
 
-        if(Integer.parseInt(valor.toString()) < Integer.parseInt(getValor().toString())){
+        if(getValorImportancia(Valor) < getValorImportancia(this.valor)){
                 //verificamos y en caso de no ser nulo, se agregará como hoja.
                 if(nodoIzquierdo != null){
-                    nodoIzquierdo.agregarNodo(valor);
+                    nodoIzquierdo.agregarNodo(Valor);
 
                 }
                 //en caso de que sea así se agregará directamente como hoja hermana
                 else {
-                    nodoIzquierdo = new Nodo<>(valor);
+                    nodoIzquierdo = new Nodo<>(Valor);
                 }
 
         }
         //lo mismo a lo anterior pero sin la verificación de nodo raíz.
         else {
             if(nodoDerecho != null){
-                nodoDerecho.agregarNodo(valor);
+                nodoDerecho.agregarNodo(Valor);
             }
             else {
-                nodoDerecho = new Nodo<>(valor);
+                nodoDerecho = new Nodo<>(Valor);
             }
         }
     }
@@ -101,7 +101,7 @@ public class Nodo<T> {
     }
 
     public T preOrden(){
-        System.out.print(valor);
+        System.out.print(this.valor);
         if(nodoIzquierdo != null){
             nodoIzquierdo.preOrden();
         }
@@ -118,7 +118,7 @@ public class Nodo<T> {
         if(nodoDerecho != null){
             nodoDerecho.postOrden();
         }
-        System.out.print(valor);
+        System.out.print(this.valor);
         return valor;
     }
 
