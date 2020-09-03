@@ -66,19 +66,14 @@ public class Nodo<T> {
          * sino se verificara si el nodo tiene una importancia menor y en caso de que sea así se remplazará.
          */
 
-        if(getValorImportancia(Valor) < getValorImportancia(this.valor)){
-                //verificamos y en caso de no ser nulo, se agregará como hoja.
-                if(nodoIzquierdo != null){
-                    nodoIzquierdo.agregarNodo(Valor);
-
-                }
-                //en caso de que sea así se agregará directamente como hoja hermana
-                else {
-                    nodoIzquierdo = new Nodo<>(Valor);
-                }
-
+        if(getValorImportancia(Valor) <= getValorImportancia(valor)){
+            if(nodoIzquierdo != null){
+                nodoIzquierdo.agregarNodo(Valor);
+            }
+            else {
+                nodoIzquierdo = new Nodo<>(Valor);
+            }
         }
-        //lo mismo a lo anterior pero sin la verificación de nodo raíz.
         else {
             if(nodoDerecho != null){
                 nodoDerecho.agregarNodo(Valor);
@@ -87,6 +82,8 @@ public class Nodo<T> {
                 nodoDerecho = new Nodo<>(Valor);
             }
         }
+
+
     }
 
     public T inOrden(){

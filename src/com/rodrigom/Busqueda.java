@@ -1,20 +1,137 @@
 package com.rodrigom;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.*;
+
+/**
+ * Rodrigo Munguía Garrido
+ * IS17110457
+ * ITESI
+ * Lenguajes Automatas 2
+ *
+ * Programa que lee una expresión aritmética y genera
+ * su arbol de expresion junto con los 3 recorridos pertenecientes.
+ *
+ */
+
 
 public class Busqueda {
 
-    List<Character> ListaOperandos;
+    Queue<String> colaSalida;
+    Stack<String> Operadores;
 
-
-    public void porIzquierda(String expresion){
-        StringTokenizer separador = new StringTokenizer(expresion, "[+,-]");
-        while (separador.hasMoreTokens()){
-
+    /**
+     * Este metodo ayuda a clasificar el nivel de importancia que puede llegar a tener un nodo
+     * asado en la jerarquia de operaciones de manera inversa, es decir, la suma y la resta tienen mayor
+     * prioridad (en este caso prioridad 4), seguido de la multiplicación y division (prioridad 3),
+     * despues los exponenciales (prioridad 2) y por ultimo los numeros (prioridad 1), si bien estos ultimos
+     * no son un operadores, obtienen un nivel de importancia con fines de clasificación para el funcionamiento
+     * del programa.
+     *
+     * @param valor
+     * @return
+     */
+    public int nivelImportancia(String valor) {
+        if (valor.equals("+") || valor.equals("-")) {
+            return 3;
+        } else if (valor.equals("*") || valor.equals("/")) {
+            return 2;
+        } else {
+            return 1;
         }
     }
+
+    /**
+     * Este metodo convierte una expresion aritmetica infija a postfija haciendo uso del algoritmo shunting yard
+     * se hace uso de Colas y Pilas, en este caso la Cola serán los caracteres ordenados de manera postfija
+     * la Pila es un almacenamiento temporal de los operadores para su posterior guardado en la Cola de salida
+     * como se muestra a continuacion.
+     * <p>
+     * Este metodo regresa una Cola basado en la clase Queue de Java.
+     *
+     * @param expresion
+     */
+    public Queue<String> conversionPostfija(String expresion) {
+
+        //Inicialización de la cola que guardará los caracteres ordenados de manera postfija.
+        colaSalida = new LinkedList<>();
+        //Inicialización de la pila que guardará temporalmente los operadores.
+        Operadores = new Stack<>();
+        //Inicializacion de un objeto de tipo StringTokenizer en el que este caso, divide la expresión
+        //en tokens usando como limitadores operadores aritmeticos (incluyendo potencias) y parentesis de agrupamiento.
+        StringTokenizer Tokens = new StringTokenizer(expresion, ")+-*/%^(", true);
+
+        //Se recorre la lista de tokens que el StringTokenizer regresó
+        while (Tokens.hasMoreTokens()) {
+            //El token actual se guarda en una variable.
+            String Token = Tokens.nextToken();
+            /**
+             * El token actual se compara con numeros y letras haciendo uso de una expresión regular,
+             * en caso de ser verdadero se guarda directamente en la cola de salida.
+             */
+            if (Token.matches("[0-9]||[A-Za-z]+")) {
+                colaSalida.add(Token);
+            }
+
+            /**
+             * En caso contrario el token pasará por una serie de filtros para procesar su almacenamiento.
+             * Primero se compara con los caracteres +-/*(
+             */
+            else if (Token.equals("+") || Token.equals("-") || Token.equals("*") || Token.equals("/") || Token.equals("%") || Token.equals("^") || Token.equals("(")) {
+                //En caso de ser verdadero se verificara que la pila no este vacia
+                if (!Operadores.isEmpty()) {
+                    /**
+                     * Se hace uso del metodo nivelImportancia para verificar el valor de importancia del operando actual y el que esta guardado
+                     * en el tope de la pila.
+                     */
+                    if (nivelImportancia(Operadores.peek()) == nivelImportancia(Token)) {
+                        /**
+                         * En caso de que sea el mismo, se verificara si ambos son el operando ^, este es una excepción ya que se verifica de derecha a izquierda
+                         * por lo tanto si hay 2 ^ seguidos se guardaran directamente en la pila.
+                         */
+                        if (Token.equals("^") && Operadores.peek().equals("^")) {
+                            Operadores.push(Token);
+                        }
+                        /**
+                         * En caso contrario si los dos operadores tanto como el operador actual guardado en la variable y el que está en la punta
+                         * de la pila, el operando en la punta de la pila se removerá de la pila y guardandose en la cola de salida y posteriormente el operando
+                         * actual guardado en la variable se guardará en la pila.
+                         */
+                        else {
+                            colaSalida.add(Operadores.pop());
+                            Operadores.push(Token);
+                        }
+                    }
+                    /**
+                     * En caso de que sean niveles de importancia diferentes, el operador guardado en la variable se guardará directamente en la pila.
+                     */
+                    else {
+                        Operadores.push(Token);
+                    }
+                }
+                //En caso de que la pila este vacía se agrega directamente en la pila.
+                else {
+                    Operadores.push(Token);
+                }
+            }
+
+            //En caso de que se haya encontrado un caracter de parentesis cerrado, se borrarán de la pila todos los operadores hasta encontrar
+            //el parentesis abierto.
+            else if (Token.equals(")")) {
+                String temp;
+                do {
+                    temp = Operadores.pop();
+                    if (!temp.equals("(")) {
+                        colaSalida.add(temp);
+                    }
+                } while (!temp.equals("("));
+            }
+        }
+
+        //Finalmente, todos los operadores residuales en la pila se guardan en la cola de salida.
+        while (!Operadores.empty()) {
+            colaSalida.add(Operadores.pop());
+        }
+        return colaSalida;
+    }
+
 }
