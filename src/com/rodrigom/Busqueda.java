@@ -9,7 +9,7 @@ import java.util.*;
  * Lenguajes Automatas 2
  *
  * Programa que lee una expresión aritmética y genera
- * su arbol de expresion junto con los 3 recorridos pertenecientes.
+ * su árbol de expresion junto con los 3 recorridos pertenecientes.
  *
  */
 
@@ -20,10 +20,10 @@ public class Busqueda {
     Stack<String> Operadores;
 
     /**
-     * Este metodo ayuda a clasificar el nivel de importancia que puede llegar a tener un nodo
-     * asado en la jerarquia de operaciones de manera inversa, es decir, la suma y la resta tienen mayor
+     * Este método ayuda a clasificar el nivel de importancia que puede llegar a tener un nodo
+     * asado en la jerarquía de operaciones de manera inversa, es decir, la suma y la resta tienen mayor
      * prioridad (en este caso prioridad 4), seguido de la multiplicación y division (prioridad 3),
-     * despues los exponenciales (prioridad 2) y por ultimo los numeros (prioridad 1), si bien estos ultimos
+     * después los exponenciales (prioridad 2) y por ultimo los números (prioridad 1), si bien estos últimos
      * no son un operadores, obtienen un nivel de importancia con fines de clasificación para el funcionamiento
      * del programa.
      *
@@ -41,12 +41,11 @@ public class Busqueda {
     }
 
     /**
-     * Este metodo convierte una expresion aritmetica infija a postfija haciendo uso del algoritmo shunting yard
+     * Este método convierte una expresion aritmética infija a postfija haciendo uso del algoritmo shunting yard
      * se hace uso de Colas y Pilas, en este caso la Cola serán los caracteres ordenados de manera postfija
      * la Pila es un almacenamiento temporal de los operadores para su posterior guardado en la Cola de salida
-     * como se muestra a continuacion.
-     * <p>
-     * Este metodo regresa una Cola basado en la clase Queue de Java.
+     * como se muestra a continuación.
+     * Este método regresa una Cola basado en la clase Queue de Java.
      *
      * @param expresion
      */
@@ -71,16 +70,15 @@ public class Busqueda {
             if (Token.matches("[0-9]||[A-Za-z]+")) {
                 colaSalida.add(Token);
             }
-
             /**
              * En caso contrario el token pasará por una serie de filtros para procesar su almacenamiento.
              * Primero se compara con los caracteres +-/*(
              */
             else if (Token.equals("+") || Token.equals("-") || Token.equals("*") || Token.equals("/") || Token.equals("%") || Token.equals("^") || Token.equals("(")) {
-                //En caso de ser verdadero se verificara que la pila no este vacia
+                //En caso de ser verdadero se verificara que la pila no este vacía
                 if (!Operadores.isEmpty()) {
                     /**
-                     * Se hace uso del metodo nivelImportancia para verificar el valor de importancia del operando actual y el que esta guardado
+                     * Se hace uso del método nivelImportancia para verificar el valor de importancia del operando actual y el que esta guardado
                      * en el tope de la pila.
                      */
                     if (nivelImportancia(Operadores.peek()) == nivelImportancia(Token)) {
@@ -93,7 +91,7 @@ public class Busqueda {
                         }
                         /**
                          * En caso contrario si los dos operadores tanto como el operador actual guardado en la variable y el que está en la punta
-                         * de la pila, el operando en la punta de la pila se removerá de la pila y guardandose en la cola de salida y posteriormente el operando
+                         * de la pila, el operando en la punta de la pila se removerá de la pila y guardándose en la cola de salida y posteriormente el operando
                          * actual guardado en la variable se guardará en la pila.
                          */
                         else {
@@ -114,8 +112,8 @@ public class Busqueda {
                 }
             }
 
-            //En caso de que se haya encontrado un caracter de parentesis cerrado, se borrarán de la pila todos los operadores hasta encontrar
-            //el parentesis abierto.
+            //En caso de que se haya encontrado un carácter de paréntesis cerrado, se borrarán de la pila todos los operadores hasta encontrar
+            //el paréntesis abierto.
             else if (Token.equals(")")) {
                 String temp;
                 do {
