@@ -1,5 +1,8 @@
 package com.rodrigom;
 
+import com.sun.source.tree.ExpressionTree;
+
+import java.beans.Expression;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
@@ -17,8 +20,19 @@ import java.util.StringTokenizer;
 public class Main {
 
     public static void main(String[] args) {
-        String Exp = "3+2";
-        Busqueda buscar = new Busqueda();
-        buscar.conversionPostfija(Exp);
+        Scanner Entrada = new Scanner(System.in);
+        Busqueda Conversion = new Busqueda();
+        ArbolExpresion ArbolExp = new ArbolExpresion();
+
+
+
+        System.out.print("Ingrese la expresión aritmetica: ");
+        String Exp = Entrada.nextLine().replaceAll(" ", "");
+
+
+        Nodo Raiz = ArbolExp.construirArbol(Conversion.convertirExp(Exp).toArray(String[]::new));
+
+        System.out.println("lol");
+
     }
 }

@@ -1,16 +1,16 @@
 package com.rodrigom;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Rodrigo Munguía Garrido
  * IS17110457
  * ITESI
  * Lenguajes Automatas 2
- *
+ * <p>
  * Programa que lee una expresión aritmética y genera
  * su árbol de expresion junto con los 3 recorridos pertenecientes.
- *
  */
 
 
@@ -20,116 +20,117 @@ public class Busqueda {
     Stack<String> Operadores;
 
     /**
-     * Este método ayuda a clasificar el nivel de importancia que puede llegar a tener un nodo
-     * asado en la jerarquía de operaciones de manera inversa, es decir, la suma y la resta tienen mayor
-     * prioridad (en este caso prioridad 4), seguido de la multiplicación y division (prioridad 3),
-     * después los exponenciales (prioridad 2) y por ultimo los números (prioridad 1), si bien estos últimos
-     * no son un operadores, obtienen un nivel de importancia con fines de clasificación para el funcionamiento
-     * del programa.
-     *
+     * Este método es una herramienta para clasificar los strings por los cuales es sobrecargado
+     * dependiendo si el string contiene operadores u operandos este regresará un calor especifico
+     * los valores son una representacion de la jerarquia de operadores donde + y - son los de menor
+     * prioridad, seguido de * y / y finalmente de ^, para hacer funcionar el algoritmo tambien se agregó
+     * como salida por default -1 para todo aquel string que no contenga un operador.
      * @param valor
      * @return
      */
     public int nivelImportancia(String valor) {
-        if (valor.equals("+") || valor.equals("-")) {
-            return 3;
-        } else if (valor.equals("*") || valor.equals("/")) {
-            return 2;
-        } else {
-            return 1;
+        switch (valor.toCharArray()[0]) {
+            case '+':
+            case '-':
+                return 1;
+            case '*':
+            case '/':
+                return 2;
+            case '^':
+                return 3;
         }
+        return -1;
     }
 
+
     /**
-     * Este método convierte una expresion aritmética infija a postfija haciendo uso del algoritmo shunting yard
-     * se hace uso de Colas y Pilas, en este caso la Cola serán los caracteres ordenados de manera postfija
-     * la Pila es un almacenamiento temporal de los operadores para su posterior guardado en la Cola de salida
-     * como se muestra a continuación.
-     * Este método regresa una Cola basado en la clase Queue de Java.
+     * En este metodo se sobrecarga con una expresion aritmetica provocando una inicialización para la
+     * estructura colaSalida la cual alojará la expresion aritmetica infija convertida a una expresion artimetica a
+     * prefija, para ello se necesita una pila (Operadores) y un objeto que ayude separar cada elemento de la expresion.
+     *
+     * Para la conversion se utilizará una version modificada del algoritmo Shunting-yard. Esta version necesita una
+     * expresion aritmetica escrita de manera inversa para funcionar.
      *
      * @param expresion
+     * @return
      */
-    public Queue<String> conversionPostfija(String expresion) {
-
-        //Inicialización de la cola que guardará los caracteres ordenados de manera postfija.
+    public Queue<String> convertirExp(String expresion) {
+        //Inicializacion de las estructuras de datos.
         colaSalida = new LinkedList<>();
-        //Inicialización de la pila que guardará temporalmente los operadores.
         Operadores = new Stack<>();
-        //Inicializacion de un objeto de tipo StringTokenizer en el que este caso, divide la expresión
-        //en tokens usando como limitadores operadores aritmeticos (incluyendo potencias) y parentesis de agrupamiento.
+        //Este objeto guarda todos los elementos por separado de la expresion guardandolos en una tabla de tokens.
         StringTokenizer Tokens = new StringTokenizer(expresion, ")+-*/%^(", true);
 
-        //Se recorre la lista de tokens que el StringTokenizer regresó
-        while (Tokens.hasMoreTokens()) {
-            //El token actual se guarda en una variable.
-            String Token = Tokens.nextToken();
-            /**
-             * El token actual se compara con numeros y letras haciendo uso de una expresión regular,
-             * en caso de ser verdadero se guarda directamente en la cola de salida.
-             */
-            if (Token.matches("[0-9]||[A-Za-z]+")) {
-                colaSalida.add(Token);
-            }
-            /**
-             * En caso contrario el token pasará por una serie de filtros para procesar su almacenamiento.
-             * Primero se compara con los caracteres +-/*(
-             */
-            else if (Token.equals("+") || Token.equals("-") || Token.equals("*") || Token.equals("/") || Token.equals("%") || Token.equals("^") || Token.equals("(")) {
-                //En caso de ser verdadero se verificara que la pila no este vacía
-                if (!Operadores.isEmpty()) {
-                    /**
-                     * Se hace uso del método nivelImportancia para verificar el valor de importancia del operando actual y el que esta guardado
-                     * en el tope de la pila.
-                     */
-                    if (nivelImportancia(Operadores.peek()) == nivelImportancia(Token)) {
-                        /**
-                         * En caso de que sea el mismo, se verificara si ambos son el operando ^, este es una excepción ya que se verifica de derecha a izquierda
-                         * por lo tanto si hay 2 ^ seguidos se guardaran directamente en la pila.
-                         */
-                        if (Token.equals("^") && Operadores.peek().equals("^")) {
-                            Operadores.push(Token);
-                        }
-                        /**
-                         * En caso contrario si los dos operadores tanto como el operador actual guardado en la variable y el que está en la punta
-                         * de la pila, el operando en la punta de la pila se removerá de la pila y guardándose en la cola de salida y posteriormente el operando
-                         * actual guardado en la variable se guardará en la pila.
-                         */
-                        else {
-                            colaSalida.add(Operadores.pop());
-                            Operadores.push(Token);
-                        }
-                    }
-                    /**
-                     * En caso de que sean niveles de importancia diferentes, el operador guardado en la variable se guardará directamente en la pila.
-                     */
-                    else {
-                        Operadores.push(Token);
-                    }
-                }
-                //En caso de que la pila este vacía se agrega directamente en la pila.
-                else {
-                    Operadores.push(Token);
-                }
-            }
+        //Se invierte la expresion alojandola en un arreglo de Strings.
+        String[] TokenInverso = new String[Tokens.countTokens()];
+        int i = Tokens.countTokens();
 
-            //En caso de que se haya encontrado un carácter de paréntesis cerrado, se borrarán de la pila todos los operadores hasta encontrar
-            //el paréntesis abierto.
-            else if (Token.equals(")")) {
-                String temp;
-                do {
-                    temp = Operadores.pop();
-                    if (!temp.equals("(")) {
-                        colaSalida.add(temp);
-                    }
-                } while (!temp.equals("("));
+        while (Tokens.hasMoreTokens()) {
+            TokenInverso[i - 1] = Tokens.nextToken();
+            i--;
+        }
+
+        //Posteriormente, los parentesis deben ser corregidos, es decir cada ) debe ser ( y cada ) debe ser (
+        for (int it = 0; it < TokenInverso.length; it++) {
+            if (TokenInverso[it] == "(") {
+                TokenInverso[it] = ")";
+                it++;
+            } else if (TokenInverso[it] == ")") {
+                TokenInverso[it] = "(";
+                it++;
             }
         }
 
-        //Finalmente, todos los operadores residuales en la pila se guardan en la cola de salida.
+        //Aplicacion del algoritmo
+        for (String Token : TokenInverso) {
+            Apilar(Token);
+        }
+
+        //Finalmente los operandos residuales deben agregarse a la expresión.
         while (!Operadores.empty()) {
             colaSalida.add(Operadores.pop());
         }
-        return colaSalida;
+
+        //Para formato de salida, la expresión debe invertise una vez mas para dar la expresion final.
+        List<String> Reversa = colaSalida.stream().collect(Collectors.toList());
+        Collections.reverse(Reversa);
+
+        //Retorno de la expresión procesada.
+        return new LinkedList<>(Reversa);
     }
 
+    /**Este metodo es una transcripcion del algoritmo Shunting-yard con algunas modificaciones ya que originalmente ese
+     * algoritmo se utiliza para convertir expresiones infijas a postfijas.
+     * @param Token
+     */
+    private void Apilar(String Token) {
+        //Se revisa el nivel de importancia del Token actual.
+        if (nivelImportancia(Token) > 0) {
+            //Si la pila Operadores no esta vacia y el nivel de importancia del elemento en la punta es mayor al token actual
+            while (Operadores.isEmpty() == false && nivelImportancia(Operadores.peek()) >= nivelImportancia(Token)) {
+                //Se añade a la expresion el operador guardado en la pila
+                colaSalida.add(Operadores.pop());
+            }
+            //Finalmente se guarda el Token actual en la pila.
+            Operadores.push(Token);
+        } else if (Token.equals(")")) {
+            //Si el token es un parentesis cerrado, todos los operadores guardados en la pila formaran parte de la expresion
+            //hasta llegar al parentes abierto.
+            String Temp = Operadores.pop();
+            while (!Temp.equals("(")) {
+                colaSalida.add(Temp);
+                Temp = Operadores.pop();
+            }
+            //Si es un parentesis abierto se guarda en la pila, este sera eliminado hasta que se encuentre un parentesis cerrado
+        }
+        else if (Token.equals("(")) {
+            Operadores.push(Token);
+
+        }
+        //Si el nivel de la importancia es menor a 0 entonces se trata de un operando.
+        else {
+            colaSalida.add(Token);
+        }
+    }
 }
+
